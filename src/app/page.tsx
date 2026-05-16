@@ -9,12 +9,8 @@ import {
   SERIES_TEMPLATES,
   VIRAL_HOOKS,
   FUNNIEST_COMBOS,
-  type PetType,
-  type Personality,
-  type MusicGenre,
-  type VisualStyle,
-  type SeriesTemplate,
 } from '@/lib/chaos-data';
+import { ChaosPlayer, UpsellModal } from '@/components/chaos/ChaosPlayer';
 
 // ─── TYPES ──────────────────────────────────────────────────────────────────
 
@@ -62,6 +58,7 @@ export default function ChaosEngine() {
   const [error, setError] = useState('');
   const [loreBusy, setLoreBusy] = useState(false);
   const [loreError, setLoreError] = useState('');
+  const [showUpsell, setShowUpsell] = useState(false);
 
   // ─── SUGGEST BEST COMBO ────────────────────────────────────────────────
   const getSuggestedCombo = (petTypeId: string) => {
@@ -224,6 +221,15 @@ export default function ChaosEngine() {
       {view === 'gallery' && (
         <Gallery onBack={() => setView('landing')} />
       )}
+
+      {/* Upsell Modal */}
+      <UpsellModal
+        isOpen={showUpsell}
+        onClose={() => setShowUpsell(false)}
+        songTitle={songTitle}
+        petType={config.petType}
+        genreId={config.musicGenre}
+      />
     </div>
   );
 }
@@ -867,76 +873,33 @@ function ChaosStudio({
         {/* ─── STAGE: RESULT ─── */}
         {stage === 'result' && lyrics && (
           <div>
-            {/* Song Header */}
-            <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-white/5 rounded-2xl p-8 mb-6">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="text-xs font-mono text-orange-400 mb-2">CHAOS ENGINE OUTPUT</div>
-                  <h2 className="text-3xl font-black">{songTitle}</h2>
-                  <div className="flex items-center gap-3 mt-2 text-sm text-zinc-400">
-                    <span>{selectedPet?.emoji} {selectedPet?.label}</span>
-                    <span>×</span>
-                    <span>{selectedPersonality?.label}</span>
-                    <span>×</span>
-                    <span>{selectedGenre?.label}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={onStartOver}
-                  className="text-xs text-zinc-500 hover:text-white transition-colors"
-                >
-                  New Song →
-                </button>
-              </div>
-
-              {/* Lyrics */}
-              <div className="bg-black/50 rounded-xl p-6 mb-6">
-                <pre className="text-sm text-zinc-200 whitespace-pre-wrap font-mono leading-relaxed">
-                  {lyrics}
-                </pre>
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(lyrics);
-                  }}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-orange-500/30 transition-all"
-                >
-                  Copy Lyrics
-                </button>
-                <button
-                  onClick={onStartOver}
-                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold py-3 rounded-xl transition-all"
-                >
-                  Generate Another
-                </button>
-                <button
-                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold py-3 rounded-xl transition-all"
-                >
-                  ⬆ Upsell: Full Version
-                </button>
-              </div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="text-xs font-mono text-orange-400 uppercase tracking-wider">Chaos Engine Output</div>
+              <button
+                onClick={onStartOver}
+                className="text-xs text-zinc-500 hover:text-white transition-colors"
+              >
+                New Song →
+              </button>
             </div>
 
-            {/* Upsell Section */}
-            <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6">
-              <div className="text-xs font-mono text-zinc-500 mb-3">UPSELL FUNNEL</div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  { label: '8-20 sec Hook', desc: 'What you just made. Viral-ready.', price: 'FREE', active: true },
-                  { label: 'Full Version', desc: 'Complete song, 2-3 minutes.', price: '$2.99', active: false },
-                  { label: 'Spotify + Video', desc: 'Full version + music video + Spotify upload.', price: '$9.99', active: false },
-                ].map((tier, i) => (
-                  <div key={i} className={`p-4 rounded-xl border ${tier.active ? 'border-orange-500/30 bg-orange-500/5' : 'border-white/5 bg-zinc-950'}`}>
-                    <div className="font-bold text-sm mb-1">{tier.label}</div>
-                    <div className="text-xs text-zinc-500 mb-2">{tier.desc}</div>
-                    <div className={`text-lg font-black ${tier.active ? 'text-orange-400' : 'text-zinc-400'}`}>{tier.price}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Audio Player with built-in upsell */}
+            <ChaosPlayer
+              genreId={config.musicGenre}
+              lyrics={lyrics}
+              songTitle={songTitle}
+              petType={config.petType}
+              personality={config.personality}
+              onUpsell={() => setShowUpsell(true)}
+            />
+
+            {/* Generate Another button */}
+            <button
+              onClick={onStartOver}
+              className="w-full mt-4 bg-zinc-900 border border-white/5 hover:border-white/10 text-zinc-300 font-bold py-3 rounded-xl transition-all"
+            >
+              Generate Another Chaos Song
+            </button>
           </div>
         )}
       </div>
