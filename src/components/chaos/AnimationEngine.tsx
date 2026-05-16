@@ -109,6 +109,18 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
   const [freeCreations, setFreeCreations] = useState<number>(0);
   const [accessMode, setAccessMode] = useState<'locked' | 'free' | 'byok'>('locked');
 
+  // ── Video Generation State (Vessel Video Studio) ──────────────────────────
+  const [generatingTool, setGeneratingTool] = useState<string | null>(null);
+  const [activeJob, setActiveJob] = useState<{
+    jobId: string;
+    provider: string;
+    modelId: string;
+    status: string;
+    progress?: number;
+    resultUrl?: string;
+    error?: string;
+  } | null>(null);
+
   // On mount: restore key, referral link, free creations
   useEffect(() => {
     const blob = localStorage.getItem(STORAGE_KEY);
@@ -199,6 +211,88 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
     } finally {
       if (!silent) setVerifying(false);
     }
+  }
+
+  async function renderVideoPrompt(toolKey: 'veo' | 'kling' | 'runway', isFreeCreation = false) {
+    if (generatingTool !== null) return;
+    setGeneratingTool(toolKey);
+    setActiveJob(null);
+
+    const prompt = VIDEO_PROMPTS[toolKey];
+    const modelMap: Record<string, { forceModelId: string; forceProvider: string }> = {
+      veo: { forceModelId: 'veo-3.1-fast', forceProvider: 'fal' },
+      kling: { forceModelId: 'kling-3.0-pro', forceProvider: 'fal' },
+      runway: { forceModelId: 'seedance-1.5-pro', forceProvider: 'zenmux' },
+    };
+
+    const target = modelMap[toolKey];
+
+    try {
+      const res = await fetch('/api/chaos/video/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          durationSeconds: 8,
+          aspectRatio: '16:9',
+          resolution: '1080p',
+          generateAudio: true,
+          forceModelId: target.forceModelId,
+          forceProvider: target.forceProvider,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`❌ Generation failed: ${data.error || 'Unknown error'}\n\n💡 Make sure Vessel Video Studio is running on port 3030 (npm run dev in vessel-video-studio).`);
+        setGeneratingTool(null);
+        return;
+      }
+
+      if (isFreeCreation) {
+        setFreeCreations(0);
+        localStorage.setItem(FREE_CREATION_KEY, '0');
+        setAccessMode('byok');
+      }
+
+      setActiveJob({
+        jobId: data.jobId,
+        provider: data.provider,
+        modelId: data.modelId,
+        status: 'queued',
+      });
+
+      // Start polling
+      pollJobStatus(data.jobId, data.provider, data.modelId);
+    } catch {
+      alert('❌ Network error: Could not reach video generation proxy. Please verify backend service.');
+      setGeneratingTool(null);
+    }
+  }
+
+  function pollJobStatus(jobId: string, provider: string, modelId: string) {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/chaos/video/status?jobId=${encodeURIComponent(jobId)}&provider=${encodeURIComponent(provider)}&modelId=${encodeURIComponent(modelId)}`);
+        if (!res.ok) return;
+        const statusData = await res.json();
+
+        setActiveJob(prev => prev ? {
+          ...prev,
+          status: statusData.status,
+          progress: statusData.progress || prev.progress,
+          resultUrl: statusData.resultUrl,
+          error: statusData.error,
+        } : null);
+
+        if (statusData.status === 'completed' || statusData.status === 'failed') {
+          clearInterval(interval);
+          setGeneratingTool(null);
+        }
+      } catch {
+        // keep polling
+      }
+    }, 3000);
   }
 
   function logout() {
@@ -518,6 +612,58 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
         {/* ── AI VIDEO PROMPTS ── */}
         {tab === 'prompts' && (
           <div className="space-y-6">
+            {activeJob && (
+              <div className="bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-orange-500/20 border border-purple-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-purple-500 animate-ping" />
+                    <span className="text-sm font-bold uppercase tracking-wider text-purple-300">
+                      Vessel Video Studio ({activeJob.provider} • {activeJob.modelId})
+                    </span>
+                  </div>
+                  <span className={`text-xs px-3 py-1 rounded-full font-mono uppercase font-black ${
+                    activeJob.status === 'completed' ? 'bg-green-500/20 text-green-300 border border-green-500/40' :
+                    activeJob.status === 'failed' ? 'bg-red-500/20 text-red-300 border border-red-500/40' :
+                    'bg-purple-500/20 text-purple-300 border border-purple-500/40 animate-pulse'
+                  }`}>
+                    {activeJob.status} {activeJob.progress !== undefined && activeJob.status !== 'completed' ? `(${activeJob.progress}%)` : ''}
+                  </span>
+                </div>
+
+                {activeJob.error && (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-300">
+                    {activeJob.error}
+                  </div>
+                )}
+
+                {activeJob.resultUrl && (
+                  <div className="space-y-2 pt-2">
+                    <div className="text-xs text-green-400 font-mono flex items-center gap-1.5">
+                      <span>🎉</span> Generation Complete! Here is your rendered video:
+                    </div>
+                    <video
+                      src={activeJob.resultUrl}
+                      controls
+                      autoPlay
+                      loop
+                      playsInline
+                      className="w-full max-h-96 rounded-xl border border-white/10 shadow-2xl bg-black"
+                    />
+                    <div className="flex justify-end">
+                      <a
+                        href={activeJob.resultUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2 rounded-lg transition-all"
+                      >
+                        💾 Download Video
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {accessMode === 'free' && freeCreations > 0 && (
               <div className="bg-gradient-to-r from-orange-500/20 via-red-500/20 to-purple-500/20 border border-orange-500/40 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl">
                 <div>
@@ -526,15 +672,15 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
                   <p className="text-sm text-zinc-300">Your saved referral link granted you 1 free AI video generation across Veo, Kling, or Runway models.</p>
                 </div>
                 <button
-                  onClick={() => {
-                    setFreeCreations(0);
-                    localStorage.setItem(FREE_CREATION_KEY, '0');
-                    setAccessMode('byok');
-                    alert('🎉 Free Video Creation successfully rendered! Your free creation has been used. Please connect your ZenMux API key (BYOK) for unlimited future renders.');
-                  }}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black px-6 py-3.5 rounded-xl shadow-xl shadow-orange-500/30 whitespace-nowrap transition-all hover:scale-105 flex items-center gap-2"
+                  onClick={() => renderVideoPrompt('kling', true)}
+                  disabled={generatingTool !== null}
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:opacity-50 text-white font-black px-6 py-3.5 rounded-xl shadow-xl shadow-orange-500/30 whitespace-nowrap transition-all hover:scale-105 flex items-center gap-2"
                 >
-                  <span>🚀</span> Produce AI Video (Use Free Credit)
+                  {generatingTool ? (
+                    <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Rendering Video...</>
+                  ) : (
+                    <><span>🚀</span> Produce AI Video (Use Free Credit)</>
+                  )}
                 </button>
               </div>
             )}
@@ -544,22 +690,35 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
                 const meta: Record<string, { label: string; color: string; emoji: string }> = {
                   veo: { label: 'Google Veo', color: 'from-blue-500 to-cyan-500', emoji: '🔵' },
                   kling: { label: 'Kling AI', color: 'from-pink-500 to-rose-500', emoji: '🌸' },
-                  runway: { label: 'Runway ML', color: 'from-violet-500 to-purple-500', emoji: '🟣' },
+                  runway: { label: 'Runway ML / Seedance', color: 'from-violet-500 to-purple-500', emoji: '🟣' },
                 };
                 const m = meta[tool];
                 return (
                   <div key={tool} className="bg-white/5 rounded-2xl p-5 border border-white/5">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                       <div className="flex items-center gap-2">
                         <span>{m.emoji}</span>
                         <span className={`text-sm font-black bg-gradient-to-r ${m.color} bg-clip-text text-transparent`}>{m.label}</span>
                       </div>
-                      <button
-                        onClick={() => copy(VIDEO_PROMPTS[tool], tool)}
-                        className="text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all"
-                      >
-                        {copiedKey === tool ? '✓ Copied!' : '📋 Copy Prompt'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => renderVideoPrompt(tool)}
+                          disabled={generatingTool !== null}
+                          className="text-xs font-black bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 px-4 py-2 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex items-center gap-1.5 text-white"
+                        >
+                          {generatingTool === tool ? (
+                            <><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Rendering...</>
+                          ) : (
+                            <><span>🎬</span> Render Animation (Vessel Studio)</>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => copy(VIDEO_PROMPTS[tool], tool)}
+                          className="text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-xl transition-all text-white"
+                        >
+                          {copiedKey === tool ? '✓ Copied!' : '📋 Copy Prompt'}
+                        </button>
+                      </div>
                     </div>
                     <p className="text-sm text-zinc-300 leading-relaxed bg-black/30 rounded-xl p-4 font-mono">
                       {VIDEO_PROMPTS[tool]}
