@@ -218,7 +218,7 @@ function midiToFreq(midi: number): number {
 
 // ─── SYNTHESIZER FUNCTIONS ──────────────────────────────────────────────────
 
-function playKick(ctx: AudioContext, time: number, gain: number = 0.8) {
+function playKick(ctx: BaseAudioContext, time: number, gain: number = 0.8) {
   const osc = ctx.createOscillator();
   const gainNode = ctx.createGain();
   osc.connect(gainNode);
@@ -235,7 +235,7 @@ function playKick(ctx: AudioContext, time: number, gain: number = 0.8) {
   osc.stop(time + 0.3);
 }
 
-function playSnare(ctx: AudioContext, time: number, gain: number = 0.4) {
+function playSnare(ctx: BaseAudioContext, time: number, gain: number = 0.4) {
   // Noise component
   const bufferSize = ctx.sampleRate * 0.1;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -275,7 +275,7 @@ function playSnare(ctx: AudioContext, time: number, gain: number = 0.4) {
   osc.stop(time + 0.08);
 }
 
-function playHihat(ctx: AudioContext, time: number, gain: number = 0.15) {
+function playHihat(ctx: BaseAudioContext, time: number, gain: number = 0.15) {
   const bufferSize = ctx.sampleRate * 0.03;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -302,7 +302,7 @@ function playHihat(ctx: AudioContext, time: number, gain: number = 0.15) {
   noise.stop(time + 0.05);
 }
 
-function playBass(ctx: AudioContext, time: number, note: number, duration: number, gain: number = 0.35) {
+function playBass(ctx: BaseAudioContext, time: number, note: number, duration: number, gain: number = 0.35) {
   if (note === 0) return;
   const freq = midiToFreq(note);
 
@@ -328,7 +328,7 @@ function playBass(ctx: AudioContext, time: number, note: number, duration: numbe
   osc.stop(time + duration);
 }
 
-function playPad(ctx: AudioContext, time: number, notes: number[], duration: number, gain: number = 0.12) {
+function playPad(ctx: BaseAudioContext, time: number, notes: number[], duration: number, gain: number = 0.12) {
   notes.forEach(note => {
     const freq = midiToFreq(note);
     const osc = ctx.createOscillator();

@@ -1,0 +1,80 @@
+[
+  {
+    "scene_number": 1,
+    "duration_seconds": 7,
+    "setting": "Living room with a giant pile of laundry",
+    "action": "Biscuit pulls out a hat from his backpack and places it on his head with great excitement",
+    "camera": "Wide shot showing the entire room, then close-up on his excited face",
+    "facial_expression": "Wide-eyed with excitement",
+    "dialogue_or_lyric": "This is the best hat for my adventure!",
+    "audio": "Sound of a cartoon 'woosh' and upbeat music",
+    "visual_gag": "Hat floats up and starts to glow",
+    "transition": "Quick zoom-in on hat",
+    "thumbnail_moment": "Biscuit's surprised expression"
+  },
+  {
+    "scene_number": 2,
+    "duration_seconds": 6,
+    "setting": "Kitchen with a large sink",
+    "action": "Biscuit throws the hat into the sink and the water starts creating a bubble tornado",
+    "camera": "Low angle shot looking up at the bubbles",
+    "facial_expression": "Confused, then shocked",
+    "dialogue_or_lyric": "Wait... that's not how it works...",
+    "audio": "Sound of bubbles and splashing water",
+    "visual_gag": "Hat's internal mechanism is visible spinning like a small motor",
+    "transition": "Quick cut to Biscuit's concerned face",
+    "thumbnail_moment": "Biscuit's wide-eyed look of confusion"
+  },
+  {
+    "scene_number": 3,
+    "duration_seconds": 8,
+    "setting": "Backyard with a garden",
+    "action": "Biscuit's hat propels him into the air with a small explosion",
+    "camera": "Bird's eye view of Biscuit flying above the garden",
+    "facial_expression": "Ecstatic with excitement",
+    "dialogue_or_lyric": "I'm flying! I'm flying!",
+    "audio": "Swoosh sound and cartoon whoosh",
+    "visual_gag": "Biscuit's hat spins in circles as he flies",
+    "transition": "Cut to ground shot of hat landing hard",
+    "thumbnail_moment": "Biscuit upside down in the air"
+  },
+  {
+    "scene_number": 4,
+    "duration_seconds": 7,
+    "setting": "Garage with random tools",
+    "action": "Biscuit tries to fix his flying hat with a random collection of tools",
+    "camera": "Close-up of Biscuit's hands fumbling with tools",
+    "facial_expression": "Frustrated but determined",
+    "dialogue_or_lyric": "I must be missing something important...",
+    "audio": "Sound of tools clattering",
+    "visual_gag": "Tools are all the wrong size or shape",
+    "transition": "Quick pan to the hat flying away",
+    "thumbnail_moment": "Biscuit's frustrated expression with tools in his hands"
+  },
+  {
+    "scene_number": 5,
+    "duration_seconds": 6,
+    "setting": "Treehouse window",
+    "action": "Biscuit reaches out to grab his hat that's floating away",
+    "camera": "Wide shot showing his desperate reach",
+    "facial_expression": "Panicked",
+    "dialogue_or_lyric": "Not again... please don't leave me!",
+    "audio": "Sound of wind and his frantic panting",
+    "visual_gag": "The cat is watching from a branch above, expressionless",
+    "transition": "Cut to the cat's reaction",
+    "thumbnail_moment": "Biscuit on his back with hat flying away"
+  },
+  {
+    "scene_number": 6,
+    "duration_seconds": 8,
+    "setting": "Front porch",
+    "action": "Biscuit sits defeated but suddenly discovers a plant that the cat was hoping to grow",
+    "camera": "Dolly-in shot showing the plant",
+    "facial_expression": "Joyful with realization",
+    "dialogue_or_lyric": "Wait... this is exactly what I was looking for!",
+    "audio": "Light music swell and positive sounds",
+    "visual_gag": "The hat accidentally lands near the plant and creates a small flower",
+    "transition": "Zoom-out on plant with Biscuit's happy face",
+    "thumbnail_moment": "Biscuit's happy face with a flower blooming"
+  }
+]

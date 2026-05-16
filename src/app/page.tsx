@@ -11,10 +11,13 @@ import {
   FUNNIEST_COMBOS,
 } from '@/lib/chaos-data';
 import { ChaosPlayer, UpsellModal } from '@/components/chaos/ChaosPlayer';
+import { AnimationEngine } from '@/components/chaos/AnimationEngine';
+import { UserDashboard } from '@/components/chaos/UserDashboard';
+import { AdminMetrics } from '@/components/chaos/AdminMetrics';
 
 // ─── TYPES ──────────────────────────────────────────────────────────────────
 
-type AppView = 'landing' | 'studio' | 'lore' | 'gallery';
+type AppView = 'landing' | 'studio' | 'lore' | 'gallery' | 'admin' | 'animation' | 'dashboard';
 
 type StudioStage = 'select' | 'customize' | 'generating' | 'result';
 
@@ -186,7 +189,16 @@ export default function ChaosEngine() {
           onQuickGenerate={quickGenerate}
           onViewLore={() => { setView('lore'); }}
           onViewGallery={() => { setView('gallery'); }}
+          onViewAdmin={() => { setView('admin'); }}
+          onViewAnimation={() => { setView('animation'); }}
+          onViewDashboard={() => { setView('dashboard'); }}
         />
+      )}
+      {view === 'animation' && (
+        <AnimationEngine onBack={() => setView('landing')} />
+      )}
+      {view === 'dashboard' && (
+        <UserDashboard onBack={() => setView('landing')} />
       )}
       {view === 'studio' && (
         <ChaosStudio
@@ -203,6 +215,7 @@ export default function ChaosEngine() {
           onStartOver={startOver}
           onBack={() => { setView('landing'); startOver(); }}
           getSuggestedCombo={getSuggestedCombo}
+          onUpsell={() => setShowUpsell(true)}
         />
       )}
       {view === 'lore' && (
@@ -220,6 +233,9 @@ export default function ChaosEngine() {
       )}
       {view === 'gallery' && (
         <Gallery onBack={() => setView('landing')} />
+      )}
+      {view === 'admin' && (
+        <AdminMetrics onBack={() => setView('landing')} />
       )}
 
       {/* Upsell Modal */}
@@ -241,11 +257,17 @@ function LandingPage({
   onQuickGenerate,
   onViewLore,
   onViewGallery,
+  onViewAdmin,
+  onViewAnimation,
+  onViewDashboard,
 }: {
   onEnterStudio: () => void;
   onQuickGenerate: (hook: typeof VIRAL_HOOKS[0]) => void;
   onViewLore: () => void;
   onViewGallery: () => void;
+  onViewAdmin: () => void;
+  onViewAnimation: () => void;
+  onViewDashboard: () => void;
 }) {
   const [hoveredHook, setHoveredHook] = useState<number | null>(null);
 
@@ -269,6 +291,15 @@ function LandingPage({
             </button>
             <button onClick={onViewGallery} className="text-sm text-zinc-400 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition-all">
               Gallery
+            </button>
+            <button onClick={onViewDashboard} className="text-sm text-blue-400/80 border border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/10 px-3 py-1.5 rounded-lg font-mono transition-all flex items-center gap-1">
+              <span>📊</span> Dashboard
+            </button>
+            <button onClick={onViewAnimation} className="text-sm text-purple-400/80 border border-purple-500/20 hover:border-purple-500/50 hover:bg-purple-500/10 px-3 py-1.5 rounded-lg font-mono transition-all flex items-center gap-1">
+              <span>🎬</span> Animation Engine
+            </button>
+            <button onClick={onViewAdmin} className="text-sm text-orange-400/80 border border-orange-500/20 hover:border-orange-500/50 hover:bg-orange-500/10 px-3 py-1.5 rounded-lg font-mono transition-all flex items-center gap-1">
+              <span>🛡️</span> Admin
             </button>
             <button
               onClick={onEnterStudio}
@@ -532,6 +563,7 @@ function ChaosStudio({
   onStartOver,
   onBack,
   getSuggestedCombo,
+  onUpsell,
 }: {
   config: ChaosConfig;
   setConfig: (c: ChaosConfig) => void;
@@ -546,6 +578,7 @@ function ChaosStudio({
   onStartOver: () => void;
   onBack: () => void;
   getSuggestedCombo: (petType: string) => { personality: string; genre: string };
+  onUpsell: () => void;
 }) {
   const updateConfig = (key: keyof ChaosConfig, value: string) => {
     setConfig({ ...config, [key]: value });
@@ -890,7 +923,7 @@ function ChaosStudio({
               songTitle={songTitle}
               petType={config.petType}
               personality={config.personality}
-              onUpsell={() => setShowUpsell(true)}
+              onUpsell={onUpsell}
             />
 
             {/* Generate Another button */}
@@ -1092,8 +1125,9 @@ function LoreGenerator({
 // ─── GALLERY ─────────────────────────────────────────────────────────────────
 
 function Gallery({ onBack }: { onBack: () => void }) {
-  const [songs, setSongs] = useState<unknown[]>([]);
+  const [songs, setSongs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSongId, setActiveSongId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/chaos/songs?XTransformPort=3000')
@@ -1131,27 +1165,74 @@ function Gallery({ onBack }: { onBack: () => void }) {
             <p className="text-zinc-400">Be the first to create a viral pet meme song!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {songs.map((song: any) => {
               const pet = PET_TYPES.find(p => p.id === song.petType);
               const genre = MUSIC_GENRES.find(g => g.id === song.musicGenre);
               const personality = PERSONALITIES.find(p => p.id === song.personality);
+              const isActive = activeSongId === song.id;
+
               return (
-                <div key={song.id} className="bg-zinc-900/50 border border-white/5 rounded-xl p-5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${pet?.color || 'from-zinc-700 to-zinc-800'} flex items-center justify-center text-xl`}>
-                      {pet?.emoji || '🎵'}
-                    </div>
-                    <div>
-                      <div className="font-bold">{song.songTitle || 'Untitled'}</div>
-                      <div className="text-xs text-zinc-500">
-                        {pet?.label} &middot; {personality?.label} &middot; {genre?.label}
+                <div key={song.id} className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6 overflow-hidden flex flex-col justify-between shadow-xl">
+                  <div>
+                    {song.status === 'done' && song.coverUrl && (
+                      <div className="relative h-56 -mx-6 -mt-6 mb-5 bg-zinc-800 overflow-hidden group">
+                        <img src={song.coverUrl} alt="Cover" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/20 to-transparent" />
+                        <div className="absolute top-3 right-3 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
+                          <span className="animate-pulse">🔥</span> FULLY PRODUCED
+                        </div>
+                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10">
+                          <span className="font-black text-xl text-white drop-shadow-md truncate">{song.songTitle || 'Untitled'}</span>
+                          <button
+                            onClick={() => setActiveSongId(isActive ? null : song.id)}
+                            className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-all hover:shadow-orange-500/50 font-bold"
+                          >
+                            {isActive ? '⏹️' : '▶️'}
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {(!song.status || song.status !== 'done' || !song.coverUrl) && (
+                      <div className="flex items-center justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${pet?.color || 'from-zinc-700 to-zinc-800'} flex items-center justify-center text-2xl shadow-md`}>
+                            {pet?.emoji || '🎵'}
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg">{song.songTitle || 'Untitled'}</div>
+                            <div className="text-xs text-zinc-500">
+                              {pet?.label} &middot; {personality?.label} &middot; {genre?.label}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setActiveSongId(isActive ? null : song.id)}
+                          className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200 transition-all shadow-md"
+                        >
+                          {isActive ? 'Close Player' : 'Listen Demo'}
+                        </button>
+                      </div>
+                    )}
+
+                    {isActive && (
+                      <div className="mb-4 pt-2 border-t border-white/5">
+                        <ChaosPlayer
+                          genreId={song.musicGenre}
+                          lyrics={song.lyrics || ''}
+                          songTitle={song.songTitle || 'Untitled'}
+                          petType={song.petType}
+                          personality={song.personality}
+                        />
+                      </div>
+                    )}
+
+                    <div className="text-xs font-mono text-zinc-500 mb-2 uppercase tracking-wider">Lyrics</div>
+                    <pre className="text-xs text-zinc-300 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto bg-black/40 p-4 rounded-xl border border-white/5">
+                      {song.lyrics?.trim() || 'No lyrics available'}
+                    </pre>
                   </div>
-                  <pre className="text-xs text-zinc-400 whitespace-pre-wrap font-mono leading-relaxed max-h-40 overflow-y-auto">
-                    {song.lyrics?.substring(0, 300)}...
-                  </pre>
                 </div>
               );
             })}
@@ -1161,3 +1242,208 @@ function Gallery({ onBack }: { onBack: () => void }) {
     </div>
   );
 }
+
+// ─── ADMIN PORTAL ────────────────────────────────────────────────────────────
+
+function AdminPortal({ onBack }: { onBack: () => void }) {
+  const [songs, setSongs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchSongs = () => {
+    fetch('/api/chaos/admin/songs?XTransformPort=3000')
+      .then(r => r.json())
+      .then(data => {
+        const list = data.songs || [];
+        setSongs(list);
+        // Auto-poll while any song is generating
+        const anyGenerating = list.some((s: any) => s.status === 'generating');
+        if (anyGenerating && !pollRef.current) {
+          pollRef.current = setInterval(() => {
+            fetch('/api/chaos/admin/songs?XTransformPort=3000')
+              .then(r => r.json())
+              .then(d => {
+                const updated = d.songs || [];
+                setSongs(updated);
+                const stillGenerating = updated.some((s: any) => s.status === 'generating');
+                if (!stillGenerating && pollRef.current) {
+                  clearInterval(pollRef.current);
+                  pollRef.current = null;
+                }
+              })
+              .catch(() => {});
+          }, 5000);
+        } else if (!anyGenerating && pollRef.current) {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchSongs();
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
+
+  const handleProduce = async (songId: string) => {
+    setProcessingId(songId);
+    try {
+      const res = await fetch('/api/chaos/admin/songs?XTransformPort=3000', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ songId, action: 'produce' }),
+      });
+      if (res.ok) {
+        // Optimistically set status to generating in local state
+        setSongs(prev => prev.map(s => s.id === songId ? { ...s, status: 'generating' } : s));
+        // Start polling
+        fetchSongs();
+      }
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleTogglePublic = async (songId: string) => {
+    await fetch('/api/chaos/admin/songs?XTransformPort=3000', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ songId, action: 'togglePublic' }),
+    });
+    fetchSongs();
+  };
+
+  const handleDelete = async (songId: string) => {
+    if (!confirm('Are you sure you want to delete this chaos?')) return;
+    await fetch('/api/chaos/admin/songs?XTransformPort=3000', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ songId, action: 'delete' }),
+    });
+    fetchSongs();
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <nav className="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={onBack} className="text-zinc-400 hover:text-white transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <span className="text-sm font-bold flex items-center gap-2"><span>🛡️</span> CHAOS ENGINE ADMIN COMMAND</span>
+          </div>
+          <div className="text-xs text-zinc-500 font-mono">
+            {songs.length} total songs in database
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-black mb-2">Admin Production Control</h1>
+          <p className="text-zinc-400 text-sm">
+            Manage all user creations. Generate full high-fidelity song recordings and AI video visualizers for any draft.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-zinc-500 py-20">Loading database records...</div>
+        ) : songs.length === 0 ? (
+          <div className="text-center py-20 text-zinc-500">No songs recorded in database yet.</div>
+        ) : (
+          <div className="space-y-4">
+            {songs.map(song => {
+              const pet = PET_TYPES.find(p => p.id === song.petType);
+              const genre = MUSIC_GENRES.find(g => g.id === song.musicGenre);
+              const personality = PERSONALITIES.find(p => p.id === song.personality);
+              const isProducing = processingId === song.id;
+
+              return (
+                <div key={song.id} className="bg-zinc-950 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:border-white/20 transition-all shadow-xl">
+                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${pet?.color || 'from-zinc-700 to-zinc-800'} flex items-center justify-center text-3xl flex-shrink-0 shadow-lg`}>
+                      {pet?.emoji || '🎵'}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <span className="font-black text-lg text-white truncate">{song.songTitle || 'Untitled'}</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          song.status === 'done'
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                            : song.status === 'generating'
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                            : song.status === 'failed'
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            : 'bg-zinc-800 text-zinc-400'
+                        }`}>
+                          {song.status === 'done' ? '✓ Fully Produced'
+                            : song.status === 'generating' ? <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse" /> Generating MP3...</span>
+                            : song.status === 'failed' ? '✗ Failed'
+                            : song.status}</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          song.isPublic ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-zinc-800 text-zinc-500'
+                        }`}>
+                          {song.isPublic ? '🌐 Public Gallery' : '🔒 Private'}
+                        </span>
+                      </div>
+                      <div className="text-xs text-zinc-400 flex flex-wrap gap-2 mb-2">
+                        <span>Pet: <strong className="text-zinc-200">{pet?.label || song.petType}</strong></span> &bull;
+                        <span>Personality: <strong className="text-zinc-200">{personality?.label || song.personality}</strong></span> &bull;
+                        <span>Genre: <strong className="text-zinc-200">{genre?.label || song.musicGenre}</strong></span> &bull;
+                        <span>Visual: <strong className="text-zinc-200">{song.visualStyle}</strong></span>
+                      </div>
+                      <p className="text-xs text-zinc-500 font-mono line-clamp-2 italic bg-black/40 p-2.5 rounded-lg border border-white/5">
+                        {song.lyrics || 'No lyrics'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto">
+                    {song.status !== 'done' && song.status !== 'generating' && (
+                      <button
+                        onClick={() => handleProduce(song.id)}
+                        disabled={!!processingId}
+                        className="flex-1 md:flex-initial bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:opacity-50 text-white text-xs font-black px-5 py-3 rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2"
+                      >
+                        {processingId === song.id ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Queuing...</span>
+                          </>
+                        ) : (
+                          <><span>⚡</span> Generate Real MP3</>
+                        )}
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => handleTogglePublic(song.id)}
+                      className="flex-1 md:flex-initial bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-300 text-xs font-bold px-4 py-3 rounded-xl transition-all"
+                    >
+                      {song.isPublic ? 'Make Private' : 'Publish to Gallery'}
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(song.id)}
+                      className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold p-3 rounded-xl transition-all"
+                      title="Delete Song"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+

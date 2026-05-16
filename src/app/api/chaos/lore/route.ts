@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     });
 
     const completion = await zai.chat.completions.create({
+      model: 'llama3.1:latest',
       messages: [
         { role: 'system', content: CHAOS_LORE_SYSTEM_PROMPT },
         { role: 'user', content: prompt },

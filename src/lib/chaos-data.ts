@@ -206,7 +206,7 @@ export const VISUAL_STYLES: VisualStyle[] = [
   { id: 'rave', label: 'Neon Rave', description: 'Glow sticks, bass drops, tiny sunglasses', emoji: '🎆', color: 'from-pink-500 to-purple-600' },
   { id: 'rain_scene', label: 'Rain Scene', description: 'Dramatic rain, single tear', emoji: '🌧️', color: 'from-gray-500 to-slate-700' },
   { id: 'underwater_casino', label: 'Underwater Casino', description: 'Tiny cigars, poker tables', emoji: '🎰', color: 'from-blue-500 to-teal-600' },
-  { id: 'spinning_lasers', label: 'Spinning Lasers', description: 'Camera spin, eye lasers, glitch fx', emoji: '🌀', color: 'from-red-500 to-pink-600' },
+  { id: 'spinning_lasers', label: 'Spinning Lasers', description: 'Camera spin, eye lasers, glitch fx', emoji: '', color: 'from-red-500 to-pink-600' },
   { id: 'corporate_office', label: 'Corporate Office', description: 'Patagonia vests, whiteboard barking', emoji: '🏢', color: 'from-slate-400 to-gray-600' },
   { id: 'desert_sunset', label: 'Desert Sunset', description: 'Cactus, tiny horse, sunset', emoji: '🏜️', color: 'from-orange-500 to-red-600' },
   { id: 'pirate_ship', label: 'Pirate Ship', description: 'Jolly Roger, treasure map', emoji: '🏴‍☠️', color: 'from-red-700 to-amber-800' },
@@ -238,7 +238,7 @@ export const SERIES_TEMPLATES: SeriesTemplate[] = [
     label: 'Pets During Existential Crisis',
     description: 'Pets questioning everything. Late night thoughts. Staring into the void.',
     examples: ['Midlife Crisis Turtle', 'Nihilist Goldfish', 'Overworked Dachshund'],
-    emoji: '🌀',
+    emoji: '🫠',
     color: 'from-purple-600 to-indigo-700',
   },
   {

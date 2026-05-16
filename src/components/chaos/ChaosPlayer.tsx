@@ -91,9 +91,8 @@ export function ChaosPlayer({
       stopRef.current?.();
       stopTTS();
       if (progressInterval.current) clearInterval(progressInterval.current);
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
-  }, [audioUrl]);
+  }, []);
 
   const isPlaying = playState === 'playing';
   const isGenerating = playState === 'generating';

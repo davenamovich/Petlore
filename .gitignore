@@ -52,3 +52,7 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# Generated audio files (ACE-Step output)
+/public/audio/*.mp3
+/public/audio/*.wav

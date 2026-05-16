@@ -1,0 +1,12 @@
+{
+  "render_style": "2D cartoon with bold outlines and vibrant colors",
+  "line_style": "Bold, expressive lines with motion blur effects",
+  "lighting_style": "Bright, cheerful lighting with dramatic shadows for comedic effect",
+  "camera_style": "Dynamic angles with quick cuts and zoom-ins on expressions",
+  "background_style": "Surreal, colorful cartoon backgrounds with animated props and meme references",
+  "animation_energy": "High-energy with quick pacing, exaggerated movements, and visual gags",
+  "meme_level": "Meme-optimized with quick comedic beats and internet-native humor",
+  "emotion_style": "Strong emotional expressions with exaggerated reactions",
+  "recommended_pipeline": "Pre-rendered 2D animation with AI-enhanced transitions",
+  "recommended_tools": ["Blender for animation", "Runway ML for motion capture", "Adobe After Effects for compositing", "TouchDesigner for real-time effects"]
+}
