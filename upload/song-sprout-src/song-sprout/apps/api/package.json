@@ -1,0 +1,32 @@
+{
+  "name": "@song-sprout/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "echo 'API: no compile step (tsx runtime)'",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "better-sqlite3": "^11.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "fluent-ffmpeg": "^2.1.3",
+    "jsonwebtoken": "^9.0.2",
+    "nanoid": "^5.0.9",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

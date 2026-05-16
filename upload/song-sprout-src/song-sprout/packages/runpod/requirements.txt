@@ -1,0 +1,5 @@
+runpod
+boto3
+torch
+torchaudio
+# ACE-Step deps — add from ACE-Step-1.5/requirements.txt

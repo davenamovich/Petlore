@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+*.db
+*.db-shm
+*.db-wal
+public/audio/
+/packages/runpod/__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

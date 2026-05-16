@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ChaosSong {
+  id            String   @id @default(cuid())
+  petType       String   // chihuahua, cat, hamster, frog, goldfish, pomeranian, husky, gecko, ferret, turtle, custom
+  petName       String?
+  personality   String   // drill_rapper, conspiracy_theorist, edm_dj, goth, mobster, possessed, corporate, cowboy, pirate, npc, custom
+  musicGenre    String   // drill_rap, lofi_jazz_podcast, edm, emo_ballad, mafia_jazz, hyperpop, corporate_anthem, country, sea_shanty, phonk_trap, custom
+  visualStyle   String   // gta_cinematic, podcast_studio, rave, rain_scene, underwater_casino, spinning_lasers, corporate_office, desert_sunset, pirate_ship, slow_mo, custom
+  songTitle     String?
+  lyrics        String?
+  lore          String?  // The AI-generated pet backstory
+  seriesType    String?  // pets_with_jobs, criminal_records, existential_crisis, custom
+  hookType      String   @default("8sec") // 8sec, 15sec, 20sec
+  status        String   @default("draft") // draft, generating, done, failed
+  audioUrl      String?
+  coverUrl      String?
+  shareCount    Int      @default(0)
+  likeCount     Int      @default(0)
+  isPublic      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
