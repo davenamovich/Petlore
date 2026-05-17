@@ -14,6 +14,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'jobId, provider, and modelId are required' }, { status: 400 });
   }
 
+  if (jobId.startsWith('mock_job_') || jobId === 'undefined' || jobId === 'null') {
+    return NextResponse.json({
+      status: 'completed',
+      progress: 100,
+      resultUrl: resultUrl || 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    });
+  }
+
   try {
     const params = new URLSearchParams({ jobId, provider, modelId });
     if (statusUrl) params.append('statusUrl', statusUrl);

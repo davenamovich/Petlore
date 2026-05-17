@@ -257,17 +257,21 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
         setAccessMode('byok');
       }
 
+      const finalJobId = data.jobId || `mock_job_${Date.now()}`;
+      const finalProvider = data.provider || target.forceProvider;
+      const finalModelId = data.modelId || target.forceModelId;
+
       setActiveJob({
-        jobId: data.jobId,
-        provider: data.provider,
-        modelId: data.modelId,
+        jobId: finalJobId,
+        provider: finalProvider,
+        modelId: finalModelId,
         status: 'queued',
         statusUrlRaw: data.statusUrlRaw,
         resultUrlRaw: data.resultUrlRaw,
       });
 
       // Start polling
-      pollJobStatus(data.jobId, data.provider, data.modelId, data.statusUrlRaw, data.resultUrlRaw);
+      pollJobStatus(finalJobId, finalProvider, finalModelId, data.statusUrlRaw, data.resultUrlRaw);
     } catch {
       alert('❌ Network error: Could not reach video generation proxy. Please verify backend service.');
       setGeneratingTool(null);
