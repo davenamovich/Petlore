@@ -119,6 +119,8 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
     progress?: number;
     resultUrl?: string;
     error?: string;
+    statusUrlRaw?: string;
+    resultUrlRaw?: string;
   } | null>(null);
 
   // On mount: restore key, referral link, free creations
@@ -260,20 +262,25 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
         provider: data.provider,
         modelId: data.modelId,
         status: 'queued',
+        statusUrlRaw: data.statusUrlRaw,
+        resultUrlRaw: data.resultUrlRaw,
       });
 
       // Start polling
-      pollJobStatus(data.jobId, data.provider, data.modelId);
+      pollJobStatus(data.jobId, data.provider, data.modelId, data.statusUrlRaw, data.resultUrlRaw);
     } catch {
       alert('❌ Network error: Could not reach video generation proxy. Please verify backend service.');
       setGeneratingTool(null);
     }
   }
 
-  function pollJobStatus(jobId: string, provider: string, modelId: string) {
+  function pollJobStatus(jobId: string, provider: string, modelId: string, statusUrl?: string, resultUrl?: string) {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/chaos/video/status?jobId=${encodeURIComponent(jobId)}&provider=${encodeURIComponent(provider)}&modelId=${encodeURIComponent(modelId)}`);
+        let url = `/api/chaos/video/status?jobId=${encodeURIComponent(jobId)}&provider=${encodeURIComponent(provider)}&modelId=${encodeURIComponent(modelId)}`;
+        if (statusUrl) url += `&statusUrl=${encodeURIComponent(statusUrl)}`;
+        if (resultUrl) url += `&resultUrl=${encodeURIComponent(resultUrl)}`;
+        const res = await fetch(url);
         if (!res.ok) return;
         const statusData = await res.json();
 
