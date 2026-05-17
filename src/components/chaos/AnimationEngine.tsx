@@ -644,7 +644,7 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
                 )}
 
                 {activeJob.resultUrl && (
-                  <div className="space-y-2 pt-2">
+                  <div className="space-y-4 pt-2">
                     <div className="text-xs text-green-400 font-mono flex items-center gap-1.5">
                       <span>🎉</span> Generation Complete! Here is your rendered video:
                     </div>
@@ -656,15 +656,33 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
                       playsInline
                       className="w-full max-h-96 rounded-xl border border-white/10 shadow-2xl bg-black"
                     />
-                    <div className="flex justify-end">
-                      <a
-                        href={activeJob.resultUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2 rounded-lg transition-all"
-                      >
-                        💾 Download Video
-                      </a>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-gradient-to-r from-purple-900/30 via-black/40 to-pink-900/30 border border-purple-500/30 rounded-2xl shadow-xl">
+                      <div className="space-y-1 text-center sm:text-left">
+                        <div className="text-sm font-black text-white flex items-center gap-2 justify-center sm:justify-start">
+                          <span>✨</span> Want to save your creation & unlock the Creator Engine?
+                        </div>
+                        <p className="text-xs text-zinc-300 max-w-md leading-relaxed">
+                          Create a free account to permanently save your generation links, download high-res videos, and unlock the full multi-modal video creator engine.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-center sm:justify-end flex-shrink-0">
+                        <a
+                          href={activeJob.resultUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto text-xs bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-3 rounded-xl transition-all text-center flex items-center justify-center gap-2 border border-white/10"
+                        >
+                          💾 Download Video
+                        </a>
+                        <a
+                          href="https://zenmux.ai/invite/4E9SOE"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto text-xs bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black px-6 py-3 rounded-xl shadow-lg shadow-purple-500/25 transition-all text-center flex items-center justify-center gap-2 tracking-wide uppercase"
+                        >
+                          🚀 Sign Up Free
+                        </a>
+                      </div>
                     </div>
                   </div>
                 )}
