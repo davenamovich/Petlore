@@ -222,8 +222,8 @@ export function AnimationEngine({ onBack }: { onBack: () => void }) {
 
     const prompt = VIDEO_PROMPTS[toolKey];
     const modelMap: Record<string, { forceModelId: string; forceProvider: string }> = {
-      veo: { forceModelId: 'veo-3.1-fast', forceProvider: 'fal' },
-      kling: { forceModelId: 'kling-3.0-pro', forceProvider: 'fal' },
+      veo: { forceModelId: 'seedance-1.5-pro', forceProvider: 'zenmux' },
+      kling: { forceModelId: 'seedance-1.5-pro', forceProvider: 'zenmux' },
       runway: { forceModelId: 'seedance-1.5-pro', forceProvider: 'zenmux' },
     };
 
