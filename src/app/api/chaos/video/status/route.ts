@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const VESSEL_STUDIO_URL = 'http://localhost:3030';
+const VESSEL_STUDIO_URL = process.env.VESSEL_STUDIO_URL || 'http://localhost:3030';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
