@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     const base64Data = image.includes(',') ? image.split(',')[1] : image;
     const inputBuffer = Buffer.from(base64Data, 'base64');
     
-    let processedBuffer = inputBuffer;
+    let processedBuffer: Buffer;
     try {
       // 1. Resize and crop to 1024x1024, ensuring RGBA alpha channel
       const rawResized = await sharp(inputBuffer)
@@ -166,21 +166,32 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Convert the modified raw buffer back to standard PNG format
+      // Convert the modified raw buffer back to standard PNG format, forcing 32-bit RGBA (truecolor-alpha)
       processedBuffer = await sharp(data, {
         raw: {
           width,
           height,
-          channels: info.channels as 4,
+          channels: 4,
         }
       })
-      .png()
+      .png({ force: true })
       .toBuffer();
     } catch (err) {
-      console.error('[viral-photo/generate] Image preprocessing failed, falling back to raw buffer:', err);
+      console.error('[viral-photo/generate] Image preprocessing failed:', err);
+      // Fallback: Convert original buffer to standard square RGBA PNG
+      try {
+        processedBuffer = await sharp(inputBuffer)
+          .resize(1024, 1024, { fit: 'cover', position: 'center' })
+          .ensureAlpha()
+          .png({ force: true })
+          .toBuffer();
+      } catch (fallbackErr) {
+        console.error('[viral-photo/generate] Fallback conversion failed:', fallbackErr);
+        return NextResponse.json({ error: 'Failed to process uploaded pet image into a valid square PNG. Please try another image.' }, { status: 400 });
+      }
     }
 
-    const blob = new Blob([processedBuffer], { type: 'image/png' });
+    const blob = new Blob([new Uint8Array(processedBuffer)], { type: 'image/png' });
 
     const formData = new FormData();
     formData.append('model', useZenMux ? 'openai/gpt-image-2' : 'dall-e-2');

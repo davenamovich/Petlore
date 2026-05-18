@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { savePhoto } from '@/lib/pet-storage';
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
@@ -511,6 +512,7 @@ export function ViralPhotoAgent({ onBack }: { onBack: () => void }) {
   const [resultCaption, setResultCaption] = useState('');
   const [error, setError] = useState('');
   const [showShare, setShowShare] = useState(false);
+  const [savedToGallery, setSavedToGallery] = useState(false);
 
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null, null]);
 
@@ -656,6 +658,7 @@ export function ViralPhotoAgent({ onBack }: { onBack: () => void }) {
     setResultCaption('');
     setError('');
     setShowShare(false);
+    setSavedToGallery(false);
     setStage('upload');
   };
 
@@ -1027,7 +1030,7 @@ export function ViralPhotoAgent({ onBack }: { onBack: () => void }) {
                   </div>
                 )}
 
-                {/* Download + share buttons */}
+                {/* Download + share + save buttons */}
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => {
@@ -1047,6 +1050,27 @@ export function ViralPhotoAgent({ onBack }: { onBack: () => void }) {
                     Share & Earn $5
                   </button>
                 </div>
+                <button
+                  onClick={() => {
+                    if (savedToGallery) return;
+                    savePhoto({
+                      petName: profile?.petName || petName || 'Pet',
+                      style: selectedStyle,
+                      styleLabel: selectedStyleMeta?.label || selectedStyle,
+                      url: resultUrl,
+                      profile: profile as Record<string, unknown> | null,
+                    });
+                    setSavedToGallery(true);
+                  }}
+                  disabled={savedToGallery}
+                  className={`w-full font-black py-3 rounded-xl transition-all text-sm border ${
+                    savedToGallery
+                      ? 'bg-green-500/10 border-green-500/30 text-green-400 cursor-default'
+                      : 'bg-zinc-900 border-white/10 text-zinc-200 hover:border-purple-500/40 hover:text-white'
+                  }`}
+                >
+                  {savedToGallery ? '✓ Saved to Gallery' : 'Save to Gallery'}
+                </button>
 
                 {/* Credits status */}
                 {accessMode === 'free' && (
