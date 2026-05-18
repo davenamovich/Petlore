@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3027",
     "build": "next build && shx cp -r .next/static .next/standalone/.next/ && shx cp -r public .next/standalone/",
-    "start": "cross-env NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3027 node .next/standalone/server.js",
+    "start": "cross-env NODE_ENV=production HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
