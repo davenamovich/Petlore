@@ -14,10 +14,11 @@ import { ChaosPlayer, UpsellModal } from '@/components/chaos/ChaosPlayer';
 import { AnimationEngine } from '@/components/chaos/AnimationEngine';
 import { UserDashboard } from '@/components/chaos/UserDashboard';
 import { AdminMetrics } from '@/components/chaos/AdminMetrics';
+import { ViralPhotoAgent } from '@/components/chaos/ViralPhotoAgent';
 
 // ─── TYPES ──────────────────────────────────────────────────────────────────
 
-type AppView = 'landing' | 'studio' | 'lore' | 'gallery' | 'admin' | 'animation' | 'dashboard';
+type AppView = 'landing' | 'studio' | 'lore' | 'gallery' | 'admin' | 'animation' | 'dashboard' | 'viral';
 
 type StudioStage = 'select' | 'customize' | 'generating' | 'result';
 
@@ -197,6 +198,7 @@ export default function ChaosEngine() {
           onViewAdmin={() => { setView('admin'); }}
           onViewAnimation={() => { setView('animation'); }}
           onViewDashboard={() => { setView('dashboard'); }}
+          onViewViral={() => { setView('viral'); }}
         />
       )}
       {view === 'animation' && (
@@ -242,6 +244,9 @@ export default function ChaosEngine() {
       {view === 'admin' && (
         <AdminMetrics onBack={() => setView('landing')} />
       )}
+      {view === 'viral' && (
+        <ViralPhotoAgent onBack={() => setView('landing')} />
+      )}
 
       {/* Upsell Modal */}
       <UpsellModal
@@ -265,6 +270,7 @@ function LandingPage({
   onViewAdmin,
   onViewAnimation,
   onViewDashboard,
+  onViewViral,
 }: {
   onEnterStudio: () => void;
   onQuickGenerate: (hook: typeof VIRAL_HOOKS[0]) => void;
@@ -273,6 +279,7 @@ function LandingPage({
   onViewAdmin: () => void;
   onViewAnimation: () => void;
   onViewDashboard: () => void;
+  onViewViral: () => void;
 }) {
   const [hoveredHook, setHoveredHook] = useState<number | null>(null);
 
@@ -296,6 +303,9 @@ function LandingPage({
             </button>
             <button onClick={onViewGallery} className="text-sm text-zinc-400 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition-all">
               Gallery
+            </button>
+            <button onClick={onViewViral} className="text-sm text-purple-400/80 border border-purple-500/20 hover:border-purple-500/50 hover:bg-purple-500/10 px-3 py-1.5 rounded-lg font-mono transition-all flex items-center gap-1">
+              <span>📸</span> Viral Photos
             </button>
             <button onClick={onViewDashboard} className="text-sm text-blue-400/80 border border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/10 px-3 py-1.5 rounded-lg font-mono transition-all flex items-center gap-1">
               <span>📊</span> Dashboard
