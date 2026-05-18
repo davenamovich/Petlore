@@ -57,14 +57,14 @@ export function AdminMetrics({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     fetchSongs();
     return () => { if (pollTimer) clearInterval(pollTimer); };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-check health when user opens the System tab
   useEffect(() => {
     if (tab === 'system' && !health && !healthLoading) {
       checkHealth();
     }
-  }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tab]);
 
   async function checkHealth() {
     setHealthLoading(true);
@@ -524,7 +524,7 @@ export function AdminMetrics({ onBack }: { onBack: () => void }) {
                       <div className="text-xs text-zinc-300">Audio storage</div>
                       <div className="text-[10px] text-zinc-600 font-mono">{health.env.audioDir}</div>
                     </div>
-                    <span className="text-[10px] text-zinc-500 font-mono">{health.env.audioBaseUrl}/*</span>
+                    <span className="text-[10px] text-zinc-500 font-mono">{health.env.audioBaseUrl}{"/*"}</span>
                   </div>
                 </div>
               )}

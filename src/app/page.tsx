@@ -21,6 +21,11 @@ type AppView = 'landing' | 'studio' | 'lore' | 'gallery' | 'admin' | 'animation'
 
 type StudioStage = 'select' | 'customize' | 'generating' | 'result';
 
+type PetPhoto = {
+  url: string;
+  name: string;
+};
+
 type ChaosConfig = {
   petType: string;
   petName: string;
@@ -281,8 +286,8 @@ function LandingPage({
               CE
             </div>
             <div>
-              <div className="text-sm font-black tracking-wider">THE CHAOS ENGINE</div>
-              <div className="text-[10px] text-zinc-500 tracking-widest uppercase">Infinite AI Meme Songs</div>
+              <div className="text-sm font-black tracking-wider">PETLORE STUDIO</div>
+              <div className="text-[10px] text-zinc-500 tracking-widest uppercase">Songs owners make for their pets</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -305,7 +310,7 @@ function LandingPage({
               onClick={onEnterStudio}
               className="text-sm font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2 rounded-full shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 transition-all"
             >
-              Create Chaos
+              Make a Pet Song
             </button>
           </div>
         </div>
@@ -325,18 +330,18 @@ function LandingPage({
           </div>
 
           <h1 className="text-5xl md:text-8xl font-black tracking-tight mb-6 leading-[0.9]">
-            YOUR PET.
+            MAKE YOUR PET
             <br />
             <span className="bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent">
-              MAIN CHARACTER
+              A SONG
             </span>
             <br />
-            ENERGY.
+            PEOPLE SHARE.
           </h1>
 
           <p className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-            AI meme songs so unhinged they go viral. Pick a pet. Pick a ridiculous personality.
-            Pick a genre that makes NO sense. Then commit 100%.
+            Owners pick a viral song concept, add their pet&apos;s name and photo, then get a
+            ridiculous AI hook plus a slideshow-style visualizer ready to send around.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
@@ -344,18 +349,18 @@ function LandingPage({
               onClick={onEnterStudio}
               className="group text-lg font-black bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 transition-all flex items-center gap-2"
             >
-              Start the Chaos
+              Make My Pet Song
               <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
             <button
               onClick={onViewLore}
               className="text-lg font-bold text-zinc-300 px-8 py-4 rounded-2xl border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all"
             >
-              Generate Pet Lore
+              Browse Viral Ideas
             </button>
           </div>
 
-          <p className="text-sm text-zinc-500">8-20 second viral hooks. Then upsell the full version.</p>
+          <p className="text-sm text-zinc-500">Same viral selections. Now with your pet photo as the star.</p>
         </div>
       </section>
 
@@ -363,16 +368,16 @@ function LandingPage({
       <section className="py-20 px-4 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <div className="text-xs uppercase tracking-[0.3em] text-orange-500 font-bold mb-3">The Formula</div>
-            <h2 className="text-4xl md:text-5xl font-black">4 ingredients. Infinite chaos.</h2>
+            <div className="text-xs uppercase tracking-[0.3em] text-orange-500 font-bold mb-3">How It Works</div>
+            <h2 className="text-4xl md:text-5xl font-black">4 steps from pet photo to share post.</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { step: '01', label: 'Pet Type', desc: 'Chihuahua? Frog? Goldfish? Pick your fighter.', emoji: '🐕', color: 'from-amber-500 to-orange-600' },
-              { step: '02', label: 'Ridiculous Personality', desc: 'Drill rapper. Conspiracy theorist. Goth.', emoji: '🔥', color: 'from-red-500 to-pink-600' },
-              { step: '03', label: 'Wrong Genre', desc: 'Opera chihuahua. Death metal bunny. Phonk turtle.', emoji: '🎵', color: 'from-purple-500 to-violet-600' },
-              { step: '04', label: 'Overdramatic Visuals', desc: 'GTA cinematics. Rave. Underwater casino.', emoji: '🎬', color: 'from-pink-500 to-rose-600' },
+              { step: '01', label: 'Choose Pet', desc: 'Start with their species, name, and main-character flaw.', emoji: '🐕', color: 'from-amber-500 to-orange-600' },
+              { step: '02', label: 'Pick Viral Bit', desc: 'Drill rapper. Conspiracy theorist. Goth. Keep the proven concepts.', emoji: '🔥', color: 'from-red-500 to-pink-600' },
+              { step: '03', label: 'Upload Photo', desc: 'Add the picture owners already love showing everyone.', emoji: '📸', color: 'from-purple-500 to-violet-600' },
+              { step: '04', label: 'Share Slideshow', desc: 'A song hook plus photo-driven frames for TikTok, Reels, and texts.', emoji: '🎬', color: 'from-pink-500 to-rose-600' },
             ].map((item, i) => (
               <div key={i} className="relative group">
                 <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 hover:border-orange-500/30 transition-all">
@@ -392,8 +397,8 @@ function LandingPage({
 
           <div className="mt-12 text-center">
             <div className="inline-block bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl px-6 py-3">
-              <p className="text-lg font-black text-white">Then COMMIT 100%.</p>
-              <p className="text-sm text-zinc-400">That contrast is what makes people share it.</p>
+              <p className="text-lg font-black text-white">The joke lands because it is their actual pet.</p>
+              <p className="text-sm text-zinc-400">The absurd concept stays viral; the photo makes it personal.</p>
             </div>
           </div>
         </div>
@@ -403,9 +408,9 @@ function LandingPage({
       <section className="py-20 px-4 bg-zinc-950/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <div className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold mb-3">Viral Silly Song Ideas</div>
-            <h2 className="text-4xl md:text-5xl font-black">10 proven viral hooks</h2>
-            <p className="text-zinc-400 mt-3">Click any to generate it instantly</p>
+            <div className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold mb-3">Viral Selections</div>
+            <h2 className="text-4xl md:text-5xl font-black">Pick a proven song setup.</h2>
+            <p className="text-zinc-400 mt-3">Click any idea, then personalize it with your pet&apos;s name and photo.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -497,8 +502,8 @@ function LandingPage({
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold mb-3">The Real Product</div>
-          <h2 className="text-4xl md:text-6xl font-black mb-6">Infinite AI Meme Songs</h2>
-          <p className="text-xl text-zinc-400 mb-12">Pet-focused first. Then the world.</p>
+          <h2 className="text-4xl md:text-6xl font-black mb-6">Songs owners make for pets they love.</h2>
+          <p className="text-xl text-zinc-400 mb-12">A personal pet anthem, a photo slideshow, and an easy share moment.</p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12">
             {['Babies', 'Coworkers', 'Gamers', 'Gym Bros', 'Crypto Traders', 'DoorDashers', 'Boomers', 'Your Ex'].map((cat, i) => (
@@ -509,9 +514,9 @@ function LandingPage({
           </div>
 
           <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl p-8">
-            <p className="text-2xl font-black mb-3">THE MOST IMPORTANT RULE</p>
-            <p className="text-lg text-zinc-300 mb-4">The videos must act like this pet is the main character of a billion-dollar movie franchise.</p>
-            <p className="text-zinc-400">That contrast is what makes people share it.<br /><strong className="text-white">Dead serious production. Completely stupid concept.</strong></p>
+            <p className="text-2xl font-black mb-3">THE SHAREABLE LOOP</p>
+            <p className="text-lg text-zinc-300 mb-4">The song treats the pet like a legend. The slideshow proves the legend is real.</p>
+            <p className="text-zinc-400">That mix of absurd and personal is what owners send to everyone.</p>
           </div>
         </div>
       </section>
@@ -523,12 +528,12 @@ function LandingPage({
             Ready to
             <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent"> commit?</span>
           </h2>
-          <p className="text-xl text-zinc-400 mb-10">Pick a pet. Pick chaos. The internet isn&apos;t ready.</p>
+          <p className="text-xl text-zinc-400 mb-10">Pick a pet. Add a photo. Make the song only their owner could share.</p>
           <button
             onClick={onEnterStudio}
             className="text-lg font-black bg-gradient-to-r from-orange-500 to-red-500 text-white px-10 py-5 rounded-2xl shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 transition-all"
           >
-            Start the Chaos Engine
+            Make a Pet Song
           </button>
         </div>
       </section>
@@ -538,9 +543,9 @@ function LandingPage({
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-[10px] font-black">CE</div>
-            <span className="font-semibold text-zinc-300">THE CHAOS ENGINE</span>
+            <span className="font-semibold text-zinc-300">PETLORE STUDIO</span>
           </div>
-          <p>Infinite AI meme songs. Dead serious production. Completely stupid concept.</p>
+          <p>Personal pet songs with viral hooks and shareable photo slideshows.</p>
         </div>
       </footer>
     </div>
@@ -580,9 +585,33 @@ function ChaosStudio({
   getSuggestedCombo: (petType: string) => { personality: string; genre: string };
   onUpsell: () => void;
 }) {
+  const [petPhoto, setPetPhoto] = useState<PetPhoto | null>(null);
+
   const updateConfig = (key: keyof ChaosConfig, value: string) => {
     setConfig({ ...config, [key]: value });
   };
+
+  const handlePhotoUpload = (file: File | null) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    setPetPhoto(current => {
+      if (current) URL.revokeObjectURL(current.url);
+      return { url: URL.createObjectURL(file), name: file.name };
+    });
+  };
+
+  const handleStudioStartOver = () => {
+    setPetPhoto(current => {
+      if (current) URL.revokeObjectURL(current.url);
+      return null;
+    });
+    onStartOver();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (petPhoto) URL.revokeObjectURL(petPhoto.url);
+    };
+  }, [petPhoto]);
 
   const selectedPet = PET_TYPES.find(p => p.id === config.petType);
   const selectedPersonality = PERSONALITIES.find(p => p.id === config.personality);
@@ -615,7 +644,7 @@ function ChaosStudio({
           </div>
 
           <button
-            onClick={onStartOver}
+            onClick={handleStudioStartOver}
             className="text-xs text-zinc-500 hover:text-white transition-colors"
           >
             Start Over
@@ -705,6 +734,18 @@ function ChaosStudio({
                 />
               </div>
             </div>
+
+            <PetPhotoUploader
+              petName={config.petName}
+              selectedPetLabel={selectedPet?.label}
+              petPhoto={petPhoto}
+              onUpload={handlePhotoUpload}
+              onUpdatePhoto={(url, name) => setPetPhoto({ url, name })}
+              onRemove={() => setPetPhoto(current => {
+                if (current) URL.revokeObjectURL(current.url);
+                return null;
+              })}
+            />
 
             {/* Personality */}
             <div className="mb-8">
@@ -892,7 +933,7 @@ function ChaosStudio({
               </div>
             </div>
             <h2 className="text-2xl font-black mb-2">Committing 100%...</h2>
-            <p className="text-zinc-400 mb-6">The Chaos Engine is creating something unhinged.</p>
+            <p className="text-zinc-400 mb-6">Petlore is writing the hook and staging the photo slideshow.</p>
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <span>{selectedPet?.emoji} {selectedPet?.label}</span>
               <span>×</span>
@@ -907,9 +948,9 @@ function ChaosStudio({
         {stage === 'result' && lyrics && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <div className="text-xs font-mono text-orange-400 uppercase tracking-wider">Chaos Engine Output</div>
+              <div className="text-xs font-mono text-orange-400 uppercase tracking-wider">Pet Song Output</div>
               <button
-                onClick={onStartOver}
+                onClick={handleStudioStartOver}
                 className="text-xs text-zinc-500 hover:text-white transition-colors"
               >
                 New Song →
@@ -926,12 +967,21 @@ function ChaosStudio({
               onUpsell={onUpsell}
             />
 
+            <PetSlideshowPreview
+              petPhoto={petPhoto}
+              petName={config.petName}
+              songTitle={songTitle}
+              selectedPet={selectedPet}
+              selectedGenre={selectedGenre}
+              selectedVisual={selectedVisual}
+            />
+
             {/* Generate Another button */}
             <button
-              onClick={onStartOver}
+              onClick={handleStudioStartOver}
               className="w-full mt-4 bg-zinc-900 border border-white/5 hover:border-white/10 text-zinc-300 font-bold py-3 rounded-xl transition-all"
             >
-              Generate Another Chaos Song
+              Make Another Pet Song
             </button>
           </div>
         )}
@@ -941,6 +991,247 @@ function ChaosStudio({
 }
 
 // ─── LORE GENERATOR ─────────────────────────────────────────────────────────
+
+function PetPhotoUploader({
+  petName,
+  selectedPetLabel,
+  petPhoto,
+  onUpload,
+  onUpdatePhoto,
+  onRemove,
+}: {
+  petName: string;
+  selectedPetLabel?: string;
+  petPhoto: PetPhoto | null;
+  onUpload: (file: File | null) => void;
+  onUpdatePhoto?: (url: string, name: string) => void;
+  onRemove: () => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editPrompt, setEditPrompt] = useState('Cyberpunk neon glow, cinematic lighting');
+  const [isTransforming, setIsTransforming] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  const displayName = petName.trim() || selectedPetLabel || 'your pet';
+
+  return (
+    <div className="mb-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4">
+      <div className="bg-zinc-950 border border-white/10 rounded-2xl p-5">
+        <div className="text-xs uppercase tracking-[0.2em] text-pink-500 font-bold mb-2">Pet Photo</div>
+        <h3 className="text-xl font-bold mb-2">Upload the photo that makes the song theirs</h3>
+        <p className="text-sm text-zinc-500 mb-4">
+          This becomes the slideshow hero image owners can share with the finished hook.
+        </p>
+
+        <label className="group flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/15 bg-black/30 px-5 py-6 text-center transition-all hover:border-pink-500/50 hover:bg-pink-500/5">
+          <input
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={event => onUpload(event.target.files?.[0] || null)}
+          />
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-pink-500/10 text-2xl">
+            +
+          </div>
+          <div className="text-sm font-bold text-zinc-200">Choose a pet photo</div>
+          <div className="mt-1 text-xs text-zinc-500">Square or portrait photos work best for Reels and TikTok.</div>
+        </label>
+      </div>
+
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 min-h-64 flex flex-col">
+        {petPhoto ? (
+          <>
+            <img src={petPhoto.url} alt={`${displayName} upload preview`} className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
+            <div className="absolute left-4 right-4 bottom-4 z-10">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-pink-200/80 font-black">Slideshow Hero</div>
+              <div className="text-2xl font-black text-white drop-shadow-lg truncate">{displayName}</div>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <span className="text-xs text-zinc-300 truncate">{petPhoto.name}</span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {onUpdatePhoto && (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(!isEditing)}
+                      className="rounded-full bg-pink-500/80 border border-pink-400 px-3 py-1 text-xs font-black text-white hover:bg-pink-500 shadow-lg transition-all"
+                    >
+                      ✨ AI Restyle
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(false);
+                      onRemove();
+                    }}
+                    className="rounded-full bg-black/60 px-3 py-1 text-xs font-bold text-zinc-200 hover:bg-black"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {isEditing && onUpdatePhoto && (
+              <div className="absolute inset-x-0 bottom-0 bg-black/95 backdrop-blur-md p-4 border-t border-white/10 z-20 transition-all animate-in fade-in slide-in-from-bottom-5">
+                <div className="flex items-center justify-between mb-2 text-xs font-black tracking-wider text-pink-400 uppercase">
+                  <span>✨ AI IMAGE RE-STYLING (OPENAI)</span>
+                  <button onClick={() => setIsEditing(false)} className="text-zinc-400 hover:text-white p-1">✕</button>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editPrompt}
+                    onChange={e => setEditPrompt(e.target.value)}
+                    placeholder="e.g. Cyberpunk neon glow, cinematic lighting"
+                    className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white flex-1 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (!petPhoto || isTransforming) return;
+                      setIsTransforming(true);
+                      setEditError('');
+                      try {
+                        const res = await fetch(petPhoto.url);
+                        const blob = await res.blob();
+                        const reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = async () => {
+                          const base64data = (reader.result as string).split(',')[1] || (reader.result as string);
+                          const apiRes = await fetch('/api/chaos/edit-image', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ image: base64data, prompt: editPrompt })
+                          });
+                          const data = await apiRes.json();
+                          if (!apiRes.ok || !data.success) {
+                            setEditError(data.error || 'Transformation failed');
+                          } else {
+                            onUpdatePhoto(data.url, `ai-restyled.png`);
+                            setIsEditing(false);
+                          }
+                          setIsTransforming(false);
+                        };
+                      } catch (err: any) {
+                        setEditError(err.message || 'Transformation failed');
+                        setIsTransforming(false);
+                      }
+                    }}
+                    disabled={isTransforming}
+                    className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold px-4 py-2 rounded-lg text-xs hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-lg min-w-24 transition-all"
+                  >
+                    {isTransforming ? (
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                    ) : (
+                      'Transform'
+                    )}
+                  </button>
+                </div>
+                {editError && <div className="text-[10px] text-red-400 mt-2 bg-red-500/10 p-1.5 rounded border border-red-500/20">{editError}</div>}
+                <div className="flex gap-1.5 mt-2.5 flex-wrap">
+                  {['Cyberpunk neon', 'Majestic royalty portrait', 'Anime studio style', '80s Synthwave grid'].map(p => (
+                    <button
+                      key={p}
+                      onClick={() => setEditPrompt(p)}
+                      className="text-[10px] bg-white/5 hover:bg-white/10 text-zinc-300 px-2 py-1 rounded border border-white/5 transition-colors"
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex h-full min-h-64 flex-col items-center justify-center p-6 text-center">
+            <div className="mb-3 text-4xl">▧</div>
+            <div className="text-sm font-bold text-zinc-300">No photo yet</div>
+            <p className="mt-2 text-xs text-zinc-500">The song still works, but the share slideshow gets personal once a photo is added.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PetSlideshowPreview({
+  petPhoto,
+  petName,
+  songTitle,
+  selectedPet,
+  selectedGenre,
+  selectedVisual,
+}: {
+  petPhoto: PetPhoto | null;
+  petName: string;
+  songTitle: string;
+  selectedPet?: any;
+  selectedGenre?: any;
+  selectedVisual?: any;
+}) {
+  const petLabel = petName.trim() || selectedPet?.label || 'Your pet';
+  const shareText = `${petLabel} has a song now: "${songTitle}".`;
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ title: songTitle, text: shareText });
+      return;
+    }
+    await navigator.clipboard.writeText(shareText);
+  };
+
+  const frames = [
+    { kicker: 'Frame 01', title: petLabel, caption: selectedVisual?.label || 'Photo intro' },
+    { kicker: 'Frame 02', title: songTitle || 'Pet anthem', caption: selectedGenre?.label || 'Viral hook' },
+    { kicker: 'Frame 03', title: 'Send this to the group chat', caption: 'Ready for TikTok, Reels, and texts' },
+  ];
+
+  return (
+    <div className="mt-5 rounded-2xl border border-white/10 bg-zinc-950 p-5">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.24em] text-pink-500 font-black">Share Slideshow</div>
+          <h3 className="mt-1 text-2xl font-black">Photo reel to go with the song</h3>
+          <p className="mt-1 text-sm text-zinc-500">A preview of the visual package owners can share after the hook.</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleShare}
+          className="rounded-xl bg-white px-5 py-3 text-sm font-black text-black transition-all hover:bg-zinc-200"
+        >
+          Share Preview
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {frames.map((frame, index) => (
+          <div key={frame.kicker} className="relative aspect-[9/16] overflow-hidden rounded-xl border border-white/10 bg-black">
+            {petPhoto ? (
+              <img
+                src={petPhoto.url}
+                alt={`${petLabel} slideshow frame ${index + 1}`}
+                className={`absolute inset-0 h-full w-full object-cover ${index === 1 ? 'scale-110 rotate-1' : index === 2 ? 'scale-125 -rotate-2' : ''}`}
+              />
+            ) : (
+              <div className={`absolute inset-0 bg-gradient-to-br ${selectedPet?.color || 'from-orange-500 to-red-600'}`} />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/20" />
+            <div className="absolute left-4 right-4 top-4 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-white/70">
+              <span>{frame.kicker}</span>
+              <span>{selectedGenre?.emoji || ''}</span>
+            </div>
+            <div className="absolute left-4 right-4 bottom-4">
+              <div className="text-2xl font-black leading-none text-white drop-shadow-lg">{frame.title}</div>
+              <div className="mt-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                {frame.caption}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function LoreGenerator({
   config,
@@ -1446,4 +1737,3 @@ function AdminPortal({ onBack }: { onBack: () => void }) {
     </div>
   );
 }
-

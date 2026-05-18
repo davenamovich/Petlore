@@ -207,7 +207,7 @@ export function ChaosPlayer({
             <p className="text-sm text-zinc-400 mb-4">
               You just heard the {genre?.bpm && genre.bpm > 150 ? '12' : '15'}-second hook.
               The full version is a complete 2-3 minute song with full production,
-              mastered audio, and Spotify-ready quality.
+              mastered audio, and share-ready quality.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
@@ -225,9 +225,9 @@ export function ChaosPlayer({
                   current: false,
                 },
                 {
-                  label: 'Full Package',
+                  label: 'Share Package',
                   price: '$9.99',
-                  desc: 'Song + video + Spotify',
+                  desc: 'Song + pet slideshow',
                   current: false,
                 },
               ].map((tier, i) => (
@@ -265,7 +265,7 @@ export function ChaosPlayer({
 
             <p className="text-[10px] text-zinc-600 mt-3">
               Full version includes: complete lyrics, professional AI music production, mastered MP3 download.
-              Package adds: custom music video, Spotify upload, WAV file.
+              Package adds: custom pet photo slideshow, share-ready video, and WAV file.
             </p>
           </div>
         </div>
@@ -346,8 +346,8 @@ export function UpsellModal({ isOpen, onClose, songTitle, petType, genreId }: Up
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-bold">Full Package</div>
-                      <div className="text-xs text-zinc-400">Song + music video + Spotify upload</div>
+                      <div className="font-bold">Share Package</div>
+                      <div className="text-xs text-zinc-400">Song + pet photo slideshow for Reels and TikTok</div>
                     </div>
                     <div className="text-2xl font-black text-orange-400">$9.99</div>
                   </div>
@@ -372,7 +372,7 @@ export function UpsellModal({ isOpen, onClose, songTitle, petType, genreId }: Up
                 disabled={!email.trim()}
                 className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-black py-4 rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 disabled:opacity-30 transition-all text-lg"
               >
-                Get {selectedTier === 'full' ? 'Full Song' : 'Full Package'} — {selectedTier === 'full' ? '$2.99' : '$9.99'}
+                Get {selectedTier === 'full' ? 'Full Song' : 'Share Package'} — {selectedTier === 'full' ? '$2.99' : '$9.99'}
               </button>
 
               <p className="text-[10px] text-zinc-600 text-center mt-3">
@@ -405,7 +405,7 @@ export function UpsellModal({ isOpen, onClose, songTitle, petType, genreId }: Up
                   {selectedTier === 'package' && (
                     <div className="flex items-center gap-2">
                       <span className="w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 text-xs flex items-center justify-center font-bold">4</span>
-                      Music video + Spotify upload (24-48h)
+                      Pet photo slideshow export (24-48h)
                     </div>
                   )}
                 </div>

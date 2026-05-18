@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CHAOS_SONGWRITER_SYSTEM_PROMPT, buildChaosPrompt } from '@/lib/chaos-data';
 import { db } from '@/lib/db';
-import ZAI from 'z-ai-web-dev-sdk';
+import { callChaosLLM } from '@/lib/llm';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,8 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate lyrics using ZAI
-    const zai = await ZAI.create();
+    // Generate lyrics using callChaosLLM (Chutes or Nvidia NIM)
     const prompt = buildChaosPrompt({
       petType,
       petName,
@@ -39,8 +38,7 @@ export async function POST(request: NextRequest) {
       customVisual,
     });
 
-    const completion = await zai.chat.completions.create({
-      model: 'llama3.1:latest',
+    const lyrics = await callChaosLLM({
       messages: [
         { role: 'system', content: CHAOS_SONGWRITER_SYSTEM_PROMPT },
         { role: 'user', content: prompt },
@@ -49,7 +47,6 @@ export async function POST(request: NextRequest) {
       max_tokens: 500,
     });
 
-    const lyrics = completion.choices[0]?.message?.content || '';
     if (!lyrics) {
       return NextResponse.json({ error: 'Lyrics generation failed' }, { status: 500 });
     }

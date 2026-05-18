@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "THE CHAOS ENGINE — Infinite AI Meme Songs",
-  description: "Dead serious production. Completely stupid concept. AI meme songs so unhinged they go viral. Pick a pet, pick a ridiculous personality, pick a genre that makes NO sense, then commit 100%.",
-  keywords: ["AI", "meme songs", "pet songs", "viral", "TikTok", "custom songs", "chaos"],
+  title: "Petlore Studio - Songs Owners Make for Their Pets",
+  description: "Make a personal AI song for your pet with viral song ideas, pet photo upload, and a shareable slideshow preview.",
+  keywords: ["AI", "pet songs", "pet slideshow", "viral", "TikTok", "custom songs", "pet video"],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },

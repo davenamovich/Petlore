@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CHAOS_LORE_SYSTEM_PROMPT, buildLorePrompt } from '@/lib/chaos-data';
-import ZAI from 'z-ai-web-dev-sdk';
+import { callChaosLLM } from '@/lib/llm';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const zai = await ZAI.create();
     const prompt = buildLorePrompt({
       petType,
       petName,
@@ -23,8 +22,7 @@ export async function POST(request: NextRequest) {
       customPersonality,
     });
 
-    const completion = await zai.chat.completions.create({
-      model: 'llama3.1:latest',
+    const lore = await callChaosLLM({
       messages: [
         { role: 'system', content: CHAOS_LORE_SYSTEM_PROMPT },
         { role: 'user', content: prompt },
@@ -33,7 +31,6 @@ export async function POST(request: NextRequest) {
       max_tokens: 500,
     });
 
-    const lore = completion.choices[0]?.message?.content || '';
     if (!lore) {
       return NextResponse.json({ error: 'Lore generation failed' }, { status: 500 });
     }
