@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 
 const IDENTITY_LOCK = `Use the uploaded pet photo as the primary visual reference. Preserve the pet's exact facial structure, breed characteristics, fur colors, markings, eye shape, ear shape, muzzle shape, body proportions, and recognizable expression. Do not genericize the animal. The final image must clearly look like the same pet transformed into this scene.`;
 
@@ -115,8 +116,77 @@ export async function POST(request: NextRequest) {
 
     // Strip data URL prefix if present
     const base64Data = image.includes(',') ? image.split(',')[1] : image;
-    const buffer = Buffer.from(base64Data, 'base64');
-    const blob = new Blob([buffer], { type: 'image/png' });
+    const inputBuffer = Buffer.from(base64Data, 'base64');
+    
+    let processedBuffer = inputBuffer;
+    try {
+      // 1. Resize and crop to 1024x1024, ensuring RGBA alpha channel
+      const rawResized = await sharp(inputBuffer)
+        .resize(1024, 1024, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
+      const { data, info } = rawResized;
+      const width = info.width;
+      const height = info.height;
+
+      if (useZenMux) {
+        // For ZenMux: We keep the entire image opaque as it is a reference image,
+        // but set the very last pixel transparent to satisfy any structural validation
+        const lastPixelIdx = (width * height - 1) * 4;
+        if (lastPixelIdx + 3 < data.length) {
+          data[lastPixelIdx + 3] = 0;
+        }
+      } else {
+        // For Standard OpenAI: Standard edit/inpainting requires visible transparent areas to edit.
+        // We keep a centered circular area fully opaque (so the pet is perfectly preserved)
+        // and smoothly fade the background/edges to transparent, letting DALL-E paint the new scene!
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const maxRadius = Math.min(centerX, centerY);
+
+        const opaqueRadius = maxRadius * 0.65; // Keep center 65% fully opaque
+        const fadeWidth = maxRadius * 0.35;    // Fade the outer 35% smoothly
+
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > opaqueRadius) {
+              if (distance >= maxRadius) {
+                data[idx + 3] = 0; // Fully transparent at boundaries
+              } else {
+                // Smooth linear fade
+                const factor = 1 - (distance - opaqueRadius) / fadeWidth;
+                data[idx + 3] = Math.max(0, Math.min(255, Math.floor(factor * 255)));
+              }
+            }
+          }
+        }
+      }
+
+      // Convert the modified raw buffer back to standard PNG format
+      processedBuffer = await sharp(data, {
+        raw: {
+          width,
+          height,
+          channels: info.channels as 4,
+        }
+      })
+      .png()
+      .toBuffer();
+    } catch (err) {
+      console.error('[viral-photo/generate] Image preprocessing failed, falling back to raw buffer:', err);
+    }
+
+    const blob = new Blob([processedBuffer], { type: 'image/png' });
 
     const formData = new FormData();
     formData.append('model', useZenMux ? 'openai/gpt-image-2' : 'dall-e-2');
