@@ -143,14 +143,12 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // For Standard OpenAI: Standard edit/inpainting requires visible transparent areas to edit.
-        // We keep a centered circular area fully opaque (so the pet is perfectly preserved)
-        // and smoothly fade the background/edges to transparent, letting DALL-E paint the new scene!
+        // DALL-E 2 only supports binary transparency (strictly 0 or 255 alpha values).
+        // Semi-transparent values (e.g. 1-254) trigger the "Invalid image file or mode" API error.
+        // We preserve the central circular 70% of the pet image, and make all outer pixels 100% transparent.
         const centerX = width / 2;
         const centerY = height / 2;
-        const maxRadius = Math.min(centerX, centerY);
-
-        const opaqueRadius = maxRadius * 0.65; // Keep center 65% fully opaque
-        const fadeWidth = maxRadius * 0.35;    // Fade the outer 35% smoothly
+        const opaqueRadius = Math.min(centerX, centerY) * 0.70;
 
         for (let y = 0; y < height; y++) {
           for (let x = 0; x < width; x++) {
@@ -160,13 +158,9 @@ export async function POST(request: NextRequest) {
             const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance > opaqueRadius) {
-              if (distance >= maxRadius) {
-                data[idx + 3] = 0; // Fully transparent at boundaries
-              } else {
-                // Smooth linear fade
-                const factor = 1 - (distance - opaqueRadius) / fadeWidth;
-                data[idx + 3] = Math.max(0, Math.min(255, Math.floor(factor * 255)));
-              }
+              data[idx + 3] = 0;   // 100% transparent (DALL-E will paint the new scene here)
+            } else {
+              data[idx + 3] = 255; // 100% opaque (preserving the pet's core identity)
             }
           }
         }
