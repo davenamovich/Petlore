@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3027",
     "build": "next build && shx cp -r .next/static .next/standalone/.next/ && shx cp -r public .next/standalone/",
-    "start": "NODE_ENV=production HOSTNAME=0.0.0.0 node .next/standalone/server.js",
+    "start": "cross-env NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3027 node .next/standalone/server.js",
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
@@ -52,6 +52,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "cross-env": "10.1.0",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.2",
