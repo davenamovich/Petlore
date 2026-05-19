@@ -87,18 +87,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Unknown viral angle: ${viralAngle}` }, { status: 400 });
     }
 
-    // Resolve API key and endpoint: prefer user's ZenMux key, fall back to server OpenAI
+    // Resolve API key: prefer user's ZenMux key, fall back to server OpenAI key
     const resolvedKey = userApiKey?.trim() || process.env.OPENAI_API_KEY;
     const useZenMux = !!(userApiKey?.trim());
-    const baseUrl = useZenMux
-      ? 'https://zenmux.ai/v1/images/edits'
-      : 'https://api.openai.com/v1/images/edits';
 
     if (!resolvedKey) {
       return NextResponse.json({ error: 'No API key available. Add OPENAI_API_KEY or provide a ZenMux key.' }, { status: 500 });
     }
 
-    // Build identity-specific prompt additions from pet profile
+    // Build identity details from pet profile (used in all prompts)
     const identityDetails = petProfile
       ? [
           petProfile.breedEstimate && `Breed: ${petProfile.breedEstimate}.`,
@@ -114,107 +111,101 @@ export async function POST(request: NextRequest) {
 
     const fullPrompt = `${style.prompt}${identityDetails ? ` Pet identity reference — ${identityDetails}` : ''} ${NEGATIVE}`;
 
-    // Strip data URL prefix if present
-    const base64Data = image.includes(',') ? image.split(',')[1] : image;
-    const inputBuffer = Buffer.from(base64Data, 'base64');
-    
-    let processedBuffer: Buffer;
-    try {
-      // 1. Resize and crop to 1024x1024, ensuring RGBA alpha channel
-      const rawResized = await sharp(inputBuffer)
-        .resize(1024, 1024, {
-          fit: 'cover',
-          position: 'center'
-        })
-        .ensureAlpha()
-        .raw()
-        .toBuffer({ resolveWithObject: true });
+    let imageUrl: string | undefined;
+    let provider: string;
 
-      const { data, info } = rawResized;
-      const width = info.width;
-      const height = info.height;
+    if (useZenMux) {
+      // ── ZenMux path: gpt-image-2 edits with the uploaded photo ──────────────
+      provider = 'zenmux';
 
-      if (useZenMux) {
-        // For ZenMux: We keep the entire image opaque as it is a reference image,
-        // but set the very last pixel transparent to satisfy any structural validation
-        const lastPixelIdx = (width * height - 1) * 4;
-        if (lastPixelIdx + 3 < data.length) {
-          data[lastPixelIdx + 3] = 0;
-        }
-      } else {
-        // For Standard OpenAI: Standard edit/inpainting requires visible transparent areas to edit.
-        // DALL-E 2 only supports binary transparency (strictly 0 or 255 alpha values).
-        // Semi-transparent values (e.g. 1-254) trigger the "Invalid image file or mode" API error.
-        // We preserve the central circular 70% of the pet image, and make all outer pixels 100% transparent.
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const opaqueRadius = Math.min(centerX, centerY) * 0.70;
+      const base64Data = image.includes(',') ? image.split(',')[1] : image;
+      const inputBuffer = Buffer.from(base64Data, 'base64');
 
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4;
-            const dx = x - centerX;
-            const dy = y - centerY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance > opaqueRadius) {
-              data[idx + 3] = 0;   // 100% transparent (DALL-E will paint the new scene here)
-            } else {
-              data[idx + 3] = 255; // 100% opaque (preserving the pet's core identity)
-            }
-          }
-        }
-      }
-
-      // Convert the modified raw buffer back to standard PNG format, forcing 32-bit RGBA (truecolor-alpha)
-      processedBuffer = await sharp(data, {
-        raw: {
-          width,
-          height,
-          channels: 4,
-        }
-      })
-      .png({ force: true })
-      .toBuffer();
-    } catch (err) {
-      console.error('[viral-photo/generate] Image preprocessing failed:', err);
-      // Fallback: Convert original buffer to standard square RGBA PNG
+      let processedBuffer: Buffer;
       try {
-        processedBuffer = await sharp(inputBuffer)
+        const rawResized = await sharp(inputBuffer)
           .resize(1024, 1024, { fit: 'cover', position: 'center' })
           .ensureAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+
+        const { data: rawData, info } = rawResized;
+        // Set the very last pixel transparent so the API treats this as an edit reference
+        const lastIdx = (info.width * info.height - 1) * 4;
+        if (lastIdx + 3 < rawData.length) rawData[lastIdx + 3] = 0;
+
+        processedBuffer = await sharp(rawData, {
+          raw: { width: info.width, height: info.height, channels: 4 },
+        })
           .png({ force: true })
           .toBuffer();
-      } catch (fallbackErr) {
-        console.error('[viral-photo/generate] Fallback conversion failed:', fallbackErr);
-        return NextResponse.json({ error: 'Failed to process uploaded pet image into a valid square PNG. Please try another image.' }, { status: 400 });
+      } catch (err) {
+        console.error('[viral-photo/generate] ZenMux image preprocessing failed:', err);
+        try {
+          processedBuffer = await sharp(inputBuffer)
+            .resize(1024, 1024, { fit: 'cover', position: 'center' })
+            .ensureAlpha()
+            .png({ force: true })
+            .toBuffer();
+        } catch {
+          return NextResponse.json({ error: 'Failed to process image. Please try another photo.' }, { status: 400 });
+        }
       }
+
+      const blob = new Blob([new Uint8Array(processedBuffer)], { type: 'image/png' });
+      const formData = new FormData();
+      formData.append('model', 'openai/gpt-image-2');
+      formData.append('prompt', fullPrompt);
+      formData.append('image', blob, 'pet.png');
+      formData.append('size', '1024x1024');
+
+      const res = await fetch('https://zenmux.ai/v1/images/edits', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resolvedKey}` },
+        body: formData,
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        const errMsg = resData.error?.message || resData.error || 'ZenMux image generation failed';
+        return NextResponse.json({ error: errMsg, provider }, { status: res.status });
+      }
+
+      imageUrl = resData.data?.[0]?.b64_json
+        ? `data:image/png;base64,${resData.data[0].b64_json}`
+        : resData.data?.[0]?.url;
+
+    } else {
+      // ── Server OpenAI path: DALL-E 3 generation with detailed text prompt ───
+      // DALL-E 2 edits requires strict PNG format compliance that is unreliable
+      // across different source images. DALL-E 3 generation with the pet profile
+      // embedded in the prompt is more reliable and produces higher quality output.
+      provider = 'openai';
+
+      const res = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resolvedKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: fullPrompt,
+          n: 1,
+          size: '1024x1024',
+          quality: 'standard',
+          response_format: 'url',
+        }),
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        const errMsg = resData.error?.message || resData.error || 'OpenAI image generation failed';
+        return NextResponse.json({ error: errMsg, provider }, { status: res.status });
+      }
+
+      imageUrl = resData.data?.[0]?.url;
     }
-
-    const blob = new Blob([new Uint8Array(processedBuffer)], { type: 'image/png' });
-
-    const formData = new FormData();
-    formData.append('model', useZenMux ? 'openai/gpt-image-2' : 'dall-e-2');
-    formData.append('prompt', fullPrompt);
-    formData.append('image', blob, 'pet.png');
-    formData.append('size', '1024x1024');
-
-    const res = await fetch(baseUrl, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${resolvedKey}` },
-      body: formData,
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      // If ZenMux fails on image editing, surface a clear message
-      const errMsg = data.error?.message || data.error || 'Image generation failed';
-      return NextResponse.json({ error: errMsg, provider: useZenMux ? 'zenmux' : 'openai' }, { status: res.status });
-    }
-
-    const imageUrl = data.data?.[0]?.b64_json
-      ? `data:image/png;base64,${data.data[0].b64_json}`
-      : data.data?.[0]?.url;
 
     if (!imageUrl) {
       return NextResponse.json({ error: 'API returned empty image data' }, { status: 500 });

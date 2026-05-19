@@ -19,9 +19,6 @@ export async function GET(request: NextRequest) {
     // Fetch the song from database
     const song = await db.chaosSong.findUnique({
       where: { id: songId },
-      include: {
-        user: true,
-      }
     });
     
     if (!song) {
@@ -174,10 +171,7 @@ export async function GET_ALL(request: NextRequest) {
     }
     
     const songs = await db.chaosSong.findMany({
-      where: { 
-        userId,
-        status: 'draft'
-      },
+      where: { status: 'draft' },
       orderBy: {
         createdAt: 'desc'
       }

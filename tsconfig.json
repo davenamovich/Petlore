@@ -26,13 +26,29 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@petlore/types": [
+        "./packages/types/src/index.ts"
+      ],
+      "@petlore/prompts": [
+        "./packages/prompts/src/index.ts"
+      ],
+      "@petlore/agents": [
+        "./packages/agents/src/index.ts"
+      ],
+      "@petlore/media": [
+        "./packages/media/src/index.ts"
+      ],
+      "@petlore/scrapers": [
+        "./packages/scrapers/src/index.ts"
       ]
     }
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "next.config.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
@@ -41,6 +57,8 @@
     "examples",
     "upload",
     ".agents",
-    "slideshow"
+    "slideshow",
+    "apps",
+    "packages"
   ]
 }

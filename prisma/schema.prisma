@@ -1,4 +1,7 @@
-// This is your Prisma schema file,
+// ─────────────────────────────────────────────────────────────────────────────
+// PETLORE PODCAST AGENCY — Database Schema
+// ─────────────────────────────────────────────────────────────────────────────
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,19 +11,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── LEGACY (preserved) ──────────────────────────────────────────────────────
+
 model ChaosSong {
   id            String   @id @default(cuid())
-  petType       String   // chihuahua, cat, hamster, frog, goldfish, pomeranian, husky, gecko, ferret, turtle, custom
+  petType       String
   petName       String?
-  personality   String   // drill_rapper, conspiracy_theorist, edm_dj, goth, mobster, possessed, corporate, cowboy, pirate, npc, custom
-  musicGenre    String   // drill_rap, lofi_jazz_podcast, edm, emo_ballad, mafia_jazz, hyperpop, corporate_anthem, country, sea_shanty, phonk_trap, custom
-  visualStyle   String   // gta_cinematic, podcast_studio, rave, rain_scene, underwater_casino, spinning_lasers, corporate_office, desert_sunset, pirate_ship, slow_mo, custom
+  personality   String
+  musicGenre    String
+  visualStyle   String
   songTitle     String?
   lyrics        String?
-  lore          String?  // The AI-generated pet backstory
-  seriesType    String?  // pets_with_jobs, criminal_records, existential_crisis, custom
-  hookType      String   @default("8sec") // 8sec, 15sec, 20sec
-  status        String   @default("draft") // draft, generating, done, failed
+  lore          String?
+  seriesType    String?
+  hookType      String   @default("8sec")
+  status        String   @default("draft")
   audioUrl      String?
   coverUrl      String?
   shareCount    Int      @default(0)
@@ -28,4 +33,190 @@ model ChaosSong {
   isPublic      Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// ─── PODCAST AGENCY MODELS ───────────────────────────────────────────────────
+
+model PetProfile {
+  id              String          @id @default(cuid())
+  userId          String
+  name            String
+  species         String
+  breed           String?
+  photoUrl        String
+  cartoonImageUrl String?
+  personality     String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  characterBible  CharacterBible?
+  shows           PodcastShow[]
+  assets          GeneratedAsset[]
+}
+
+model CharacterBible {
+  id                   String      @id @default(cuid())
+  petId                String      @unique
+  pet                  PetProfile  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  hostName             String
+  visualStyle          String
+  voiceStyle           String
+  worldview            String
+  catchphrases         String
+  recurringJokes       String
+  cohostDynamic        String?
+  showPersona          String
+  emotionalTone        String
+  audienceRelationship String
+  signatureSegments    String
+  createdAt            DateTime    @default(now())
+}
+
+model PodcastShow {
+  id                String          @id @default(cuid())
+  petId             String
+  pet               PetProfile      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  title             String
+  format            String
+  tagline           String
+  description       String
+  audience          String
+  recurringSegments String
+  coverImageUrl     String?
+  isPublic          Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  episodes          Episode[]
+  scrapedContent    ContentSource[]
+}
+
+model Episode {
+  id             String      @id @default(cuid())
+  showId         String
+  show           PodcastShow @relation(fields: [showId], references: [id], onDelete: Cascade)
+  title          String
+  length         String
+  scriptMarkdown String?
+  scriptJson     String?
+  audioUrl       String?
+  status         String      @default("draft")
+  createdAt      DateTime    @default(now())
+  clips          Clip[]
+}
+
+model Clip {
+  id                    String          @id @default(cuid())
+  episodeId             String
+  episode               Episode         @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  title                 String
+  clipType              String
+  durationSeconds       Int             @default(30)
+  aspectRatio           String          @default("9:16")
+  hook                  String
+  setup                 String
+  petTake               String
+  punchline             String
+  callToAction          String
+  caption               String
+  hashtags              String
+  thumbnailText         String
+  jsonScene             String
+  animalPodcastScript   String?
+  videoUrl              String?
+  status                String          @default("draft")
+  createdAt             DateTime        @default(now())
+  promotionPlans        PromotionPlan[]
+}
+
+model ContentSource {
+  id                 String       @id @default(cuid())
+  showId             String?
+  show               PodcastShow? @relation(fields: [showId], references: [id])
+  platform           String
+  url                String
+  title              String
+  summary            String
+  topComments        String
+  viralAngle         String
+  emotionalTrigger   String
+  clipPotentialScore Float        @default(0)
+  rawText            String?
+  scrapedAt          DateTime     @default(now())
+}
+
+model PromotionPlan {
+  id             String   @id @default(cuid())
+  clipId         String
+  clip           Clip     @relation(fields: [clipId], references: [id], onDelete: Cascade)
+  platforms      String
+  tiktokCaption  String?
+  tiktokHashtags String?
+  igCaption      String?
+  igHashtags     String?
+  ytTitle        String?
+  ytDescription  String?
+  pinnedComment  String?
+  postSchedule   String?
+  createdAt      DateTime @default(now())
+}
+
+model GeneratedAsset {
+  id         String      @id @default(cuid())
+  entityId   String
+  entityType String
+  petId      String?
+  pet        PetProfile? @relation(fields: [petId], references: [id])
+  assetType  String
+  url        String
+  prompt     String?
+  metadata   String?
+  createdAt  DateTime    @default(now())
+}
+
+model AgentRun {
+  id          String    @id @default(cuid())
+  agentName   String
+  inputJson   String
+  outputJson  String?
+  status      String    @default("queued")
+  tokensUsed  Int?
+  error       String?
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+}
+
+// ─── VET NEWSLETTER MODELS ───────────────────────────────────────────────────
+
+model VetClinic {
+  id              String          @id @default(cuid())
+  name            String
+  city            String
+  state           String
+  email           String          @unique
+  phone           String?
+  website         String?
+  subscriberCount Int             @default(0)
+  newsletterName  String?
+  plan            String          @default("starter")
+  createdAt       DateTime        @default(now())
+  newsletters     VetNewsletter[]
+}
+
+model VetNewsletter {
+  id           String     @id @default(cuid())
+  clinicId     String
+  clinic       VetClinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  title        String
+  issueNumber  Int        @default(1)
+  theme        String
+  sectionsJson String
+  featuredPet  String?
+  sponsorNote  String?
+  callToAction String
+  subjectLine  String?
+  previewText  String?
+  sentAt       DateTime?
+  openRate     Float?
+  clickRate    Float?
+  status       String     @default("draft")
+  createdAt    DateTime   @default(now())
 }

@@ -90,10 +90,28 @@ function PetSetupFlow({
     catchphrase: '',
   });
 
-  function handleUpload(file: File) {
-    const reader = new FileReader();
-    reader.onloadend = () => setUploadedUrl(reader.result as string);
-    reader.readAsDataURL(file);
+  async function handleUpload(file: File) {
+    if (!file.type.startsWith('image/')) return;
+    try {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          URL.revokeObjectURL(url);
+          setUploadedUrl(reader.result as string);
+        };
+        reader.onerror = () => URL.revokeObjectURL(url);
+        reader.readAsDataURL(file);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        console.error('Error loading image object URL');
+      };
+      image.src = url;
+    } catch (error) {
+      console.error('Error processing image:', error);
+    }
   }
 
   function handleSave() {

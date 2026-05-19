@@ -555,15 +555,27 @@ export function ViralPhotoAgent({ onBack }: { onBack: () => void }) {
   const primaryPhoto = photos[0];
   const uploadedPhotos = photos.filter(Boolean) as UploadedPhoto[];
 
-  const handlePhotoUpload = useCallback((index: number, file: File) => {
+  const handlePhotoUpload = useCallback(async (index: number, file: File) => {
     if (!file.type.startsWith('image/')) return;
-    const url = URL.createObjectURL(file);
-    setPhotos(prev => {
-      const next = [...prev];
-      if (next[index]) URL.revokeObjectURL(next[index]!.url);
-      next[index] = { file, url, label: PHOTO_SLOTS[index].label };
-      return next;
-    });
+    try {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => {
+        setPhotos(prev => {
+          const next = [...prev];
+          if (next[index]) URL.revokeObjectURL(next[index]!.url);
+          next[index] = { file, url, label: PHOTO_SLOTS[index].label };
+          return next;
+        });
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        console.error('Error loading image object URL');
+      };
+      image.src = url;
+    } catch (error) {
+      console.error('Error processing image:', error);
+    }
   }, []);
 
   const removePhoto = useCallback((index: number) => {
